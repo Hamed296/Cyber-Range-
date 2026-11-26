@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة Cyber Range التدريبية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: #0c1a2d;
+            color: #fff;
+            line-height: 1.6;
+        }
+
+        /* الهيدر الرئيسي */
+        .main-header {
+            background-color: #0c1a2d;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1a2d4d;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-logo {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            display: block;
+            mix-blend-mode: screen;
+            filter: drop-shadow(0 0 8px rgba(77, 123, 255, 0.35));
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(to right, #4d7bff, #6bd3ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-item {
+            color: #8ca0c7;
+            font-size: 16px;
+            cursor: pointer;
+            transition: color 0.3s;
+            position: relative;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            color: #4d7bff;
+        }
+
+        .nav-item.active {
+            color: #4d7bff;
+        }
+
+        .nav-item.active::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            right: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #4d7bff;
+            border-radius: 2px;
+        }
+
+        /* الأقسام */
+        .section {
+            padding: 80px 30px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .section:nth-child(even) {
+            background-color: #0a1423;
+        }
+
+        /* قسم الرئيسية */
+        #home {
+            text-align: center;
+            padding: 60px 30px;
+        }
+
+        .welcome-section {
+            max-width: 950px;
+            margin: 0 auto;
+        }
+
+        .main-logo {
+            width: 400px;
+            max-width: 100%;
+            margin: 10px auto 30px;
+            display: block;
+            mix-blend-mode: screen;
+            filter: drop-shadow(0 0 14px rgba(77, 123, 255, 0.35));
+        }
+
+        .arabic-title {
+            font-size: 42px;
+            font-weight: 800;
+            color: #e0e7ff;
+            margin-bottom: 15px;
+        }
+
+        .english-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: #4d7bff;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .description {
+            max-width: 800px;
+            margin: 0 auto;
+            color: #8ca0c7;
+            font-size: 18px;
+            line-height: 1.8;
+        }
+
+        .highlight {
+            color: #4d7bff;
+            font-weight: 600;
+        }
+
+        /* قسم من نحن */
+        .about-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            align-items: center;
+        }
+
+        .about-text {
+            padding: 20px;
+        }
+
+        .about-title {
+            font-size: 32px;
+            color: #4d7bff;
+            margin-bottom: 20px;
+        }
+
+        .about-description {
+            color: #8ca0c7;
+            font-size: 17px;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        .about-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .feature {
+            background-color: #152642;
+            padding: 20px;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 200px;
+            border-right: 4px solid #4d7bff;
+        }
+
+        .feature-icon {
+            font-size: 24px;
+            color: #4d7bff;
+            margin-bottom: 15px;
+        }
+
+        .feature-title {
+            font-size: 18px;
+            color: #e0e7ff;
+            margin-bottom: 10px;
+        }
+
+        .feature-desc {
+            color: #8ca0c7;
+            font-size: 15px;
+        }
+
+        /* قسم السيناريوهات */
+        .scenarios-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 32px;
+            color: #4d7bff;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .scenarios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .scenario-card {
+            background-color: #152642;
+            border-radius: 12px;
+            padding: 30px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            border: 1px solid #1a2d4d;
+        }
+
+        .scenario-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border-color: #4d7bff;
+        }
+
+        .scenario-icon {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(77, 123, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #4d7bff;
+            margin-bottom: 20px;
+        }
+
+        .scenario-title {
+            font-size: 22px;
+            color: #e0e7ff;
+            margin-bottom: 15px;
+        }
+
+        .scenario-desc {
+            color: #8ca0c7;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        /* قسم المختبرات */
+        .labs-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .labs-description {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 50px;
+            color: #8ca0c7;
+            font-size: 18px;
+            line-height: 1.8;
+        }
+
+        .lab-item {
+            background-color: #152642;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid #4d7bff;
+        }
+
+        .lab-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .lab-icon {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(107, 211, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #6bd3ff;
+        }
+
+        .lab-title {
+            font-size: 24px;
+            color: #e0e7ff;
+        }
+
+        .lab-details {
+            color: #8ca0c7;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        /* قسم المساعدة */
+        .help-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .help-item {
+            background-color: #152642;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #1a2d4d;
+        }
+
+        .help-item:hover {
+            border-color: #4d7bff;
+            transform: translateX(-10px);
+        }
+
+        .help-question {
+            font-size: 20px;
+            color: #e0e7ff;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .help-answer {
+            color: #8ca0c7;
+            font-size: 16px;
+            line-height: 1.7;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .help-item.active .help-answer {
+            max-height: 300px;
+            margin-top: 15px;
+        }
+
+        .help-toggle {
+            color: #4d7bff;
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+
+        .help-item.active .help-toggle {
+            transform: rotate(45deg);
+        }
+
+        /* الفوتر */
+        footer {
+            background-color: #0a1423;
+            padding: 25px 30px;
+            border-top: 1px solid #1a2d4d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-text {
+            color: #8ca0c7;
+            font-size: 14px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .footer-links a {
+            color: #8ca0c7;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: #4d7bff;
+        }
+
+        /* تصميم متجاوب */
+        @media (max-width: 992px) {
+            .nav-menu {
+                gap: 20px;
+            }
+
+            .arabic-title {
+                font-size: 36px;
+            }
+
+            .english-title {
+                font-size: 30px;
+            }
+
+            .main-logo {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .section {
+                padding: 60px 20px;
+            }
+
+            footer {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .arabic-title {
+                font-size: 28px;
+            }
+
+            .english-title {
+                font-size: 24px;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+
+            .scenarios-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-logo {
+                width: 200px;
+            }
+
+            .header-logo {
+                width: 48px;
+                height: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- الهيدر الرئيسي -->
+    <header class="main-header">
+        <div class="logo">
+            <img src="logo2.png" alt="Cyber Range Logo" class="header-logo">
+            <div class="logo-text">Cyber Range</div>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="#home" class="nav-item">الرئيسية</a>
+            <a href="#about" class="nav-item">من نحن</a>
+            <a href="#scenarios" class="nav-item">السيناريوهات</a>
+            <a href="#labs" class="nav-item">المختبرات</a>
+            <a href="#help" class="nav-item">المساعدة</a>
+            <a href="/static/login.html" class="nav-item active">تسجيل الدخول</a>
+        </nav>
+    </header>
+
+    <!-- قسم الرئيسية -->
+    <section id="home" class="section">
+        <div class="welcome-section">
+            <img src="logo.png" alt="Cyber Range Logo" class="main-logo">
+           <h1 class="arabic-title">منصة التدريب السيبراني</h1>
+
+            <p class="description">
+                <span class="highlight">منصة Cyber Range</span> توفر بيئة تدريبية عملية تساعد المتدربين على تشغيل السيناريوهات والتفاعل معها
+                بما يدعم التطبيق العملي لمفاهيم الأمن السيبراني في بيئة آمنة ومعزولة.
+            </p>
+        </div>
+    </section>
+
+    <!-- قسم من نحن -->
+    <section id="about" class="section">
+        <div class="about-content">
+            <div class="about-text">
+                <h2 class="about-title">من نحن</h2>
+                <p class="about-description">
+                    منصة Cyber Range هي نظام تدريبي يهدف إلى توفير بيئة عملية لتعلم الأمن السيبراني من خلال سيناريوهات تفاعلية قابلة للتشغيل.
+                </p>
+                <p class="about-description">
+                    تتيح المنصة للمتدربين تشغيل بيئات افتراضية معزولة باستخدام Docker و Virtual Machines،
+                    مما يساعد على التطبيق العملي للمهارات دون التأثير على الأنظمة الحقيقية.
+                </p>
+
+                <div class="about-features">
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <h3 class="feature-title">رؤيتنا</h3>
+                        <p class="feature-desc">توفير بيئة تدريب عملية تدعم تنمية المهارات التطبيقية في الأمن السيبراني.</p>
+                    </div>
+
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-flag"></i>
+                        </div>
+                        <h3 class="feature-title">مهمتنا</h3>
+                        <p class="feature-desc">تقديم منصة تدريبية تساعد المتدربين على تشغيل السيناريوهات والتفاعل معها بشكل مباشر وآمن.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- قسم السيناريوهات -->
+    <section id="scenarios" class="section">
+        <div class="scenarios-container">
+            <h2 class="section-title">السيناريوهات التدريبية</h2>
+
+            <div class="scenarios-grid">
+                <div class="scenario-card">
+                    <div class="scenario-icon">
+                        <i class="fas fa-user-secret"></i>
+                    </div>
+                    <h3 class="scenario-title">الاختراق الأخلاقي</h3>
+                    <p class="scenario-desc">
+                        سيناريوهات تدريبية عملية تساعد على فهم بيئات الاختبار والتعامل مع المهام التقنية داخل بيئة معزولة وآمنة.
+                    </p>
+                </div>
+
+                <div class="scenario-card">
+                    <div class="scenario-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="scenario-title">الدفاع السيبراني</h3>
+                    <p class="scenario-desc">
+                        تدريبات تركز على التعامل مع البيئات التشغيلية ومتابعة الجلسات والوصول إلى السيناريوهات المخصصة للتدريب.
+                    </p>
+                </div>
+
+                <div class="scenario-card">
+                    <div class="scenario-icon">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <h3 class="scenario-title">أمن الشبكات</h3>
+                    <p class="scenario-desc">
+                        بيئات تدريبية تدعم الوصول عبر RDP أو TTYD حسب نوع السيناريو، بما يتيح ممارسة الجوانب العملية داخل المنصة.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- قسم المختبرات -->
+    <section id="labs" class="section">
+        <div class="labs-content">
+            <h2 class="section-title">المختبرات الافتراضية</h2>
+
+            <p class="labs-description">
+                توفر المنصة بيئات تدريبية يتم تشغيلها عند الطلب، بحيث يمكن للمتدرب التفاعل مع السيناريو مباشرة دون الحاجة إلى إعدادات معقدة.
+            </p>
+
+            <div class="lab-item">
+                <div class="lab-header">
+                    <div class="lab-icon">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <h3 class="lab-title">بيئات افتراضية باستخدام VM</h3>
+                </div>
+                <p class="lab-details">
+                    تتيح المنصة تشغيل بعض السيناريوهات باستخدام الآلات الافتراضية، مع توفير ملف RDP للوصول إلى البيئة التدريبية بعد بدء الجلسة.
+                </p>
+            </div>
+
+            <div class="lab-item">
+                <div class="lab-header">
+                    <div class="lab-icon">
+                        <i class="fas fa-terminal"></i>
+                    </div>
+                    <h3 class="lab-title">بيئات تشغيل باستخدام Docker</h3>
+                </div>
+                <p class="lab-details">
+                    تدعم المنصة تشغيل سيناريوهات تعتمد على الحاويات، مع إتاحة الوصول إليها من خلال واجهة TTYD عبر المتصفح.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- قسم المساعدة -->
+    <section id="help" class="section">
+        <div class="help-container">
+            <h2 class="section-title">المساعدة والدعم</h2>
+
+            <div class="help-item">
+                <div class="help-question">
+                    كيف يمكنني الدخول إلى المنصة؟
+                    <span class="help-toggle">+</span>
+                </div>
+                <div class="help-answer">
+                    يتم الدخول إلى المنصة باستخدام اسم المستخدم وكلمة المرور التي ينشئها مدير النظام للمتدرب.
+                </div>
+            </div>
+
+            <div class="help-item">
+                <div class="help-question">
+                    كيف يمكنني الوصول إلى السيناريو بعد تشغيله؟
+                    <span class="help-toggle">+</span>
+                </div>
+                <div class="help-answer">
+                    إذا كان السيناريو من نوع VM فسيتم توفير ملف RDP، أما إذا كان من نوع Docker فسيتم فتح واجهة TTYD للوصول إلى البيئة التدريبية.
+                </div>
+            </div>
+
+            <div class="help-item">
+                <div class="help-question">
+                    هل يمكنني تشغيل أكثر من سيناريو في نفس الوقت؟
+                    <span class="help-toggle">+</span>
+                </div>
+                <div class="help-answer">
+                    يعتمد ذلك على نوع السيناريو، حيث تمنع المنصة وجود أكثر من جلسة VM نشطة للمستخدم نفسه في الوقت ذاته.
+                </div>
+            </div>
+
+            <div class="help-item">
+                <div class="help-question">
+                    ماذا أفعل إذا واجهت مشكلة أثناء التشغيل؟
+                    <span class="help-toggle">+</span>
+                </div>
+                <div class="help-answer">
+                    يمكنك إعادة محاولة تشغيل السيناريو أو التواصل مع مسؤول النظام إذا استمرت المشكلة أثناء الوصول إلى البيئة التدريبية.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- الفوتر -->
+    <footer>
+        <div class="footer-text">
+            &copy; 2026 منصة Cyber Range التدريبية. جميع الحقوق محفوظة.
+        </div>
+        <div class="footer-links">
+            <a href="#">سياسة الخصوصية</a>
+            <a href="#">شروط الاستخدام</a>
+            <a href="#">اتصل بنا</a>
+            <a href="#">الدعم الفني</a>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            const sections = document.querySelectorAll('.section');
+
+            function setActiveNav() {
+                let current = '';
+
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (scrollY >= (sectionTop - 200)) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if (item.getAttribute('href') === `#${current}`) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', setActiveNav);
+
+            const helpItems = document.querySelectorAll('.help-item');
+            helpItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                });
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            setActiveNav();
+        });
+    </script>
+</body>
+</html>

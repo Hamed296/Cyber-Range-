@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>لوحة العرض - Cyber Range</title>
+    <link rel="stylesheet" href="/static/admin/admin.css" />
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <div class="logo">
+            <div class="logo-icon">CR</div>
+            <span>Cyber Range</span>
+        </div>
+        <div class="nav-links">
+            <a class="nav-link" href="/static/admin/dashboard.html">لوحة التحكم</a>
+            <a class="nav-link" href="/static/admin/users.html">إدارة المستخدمين</a>
+            <a class="nav-link" href="/static/admin/scenarios.html">إدارة السيناريوهات</a>
+            <a class="nav-link" href="/static/admin/platform.html">إدارة المنصة</a>
+            <a class="nav-link active" href="/static/admin/overview.html">لوحة العرض</a>
+        </div>
+    </div>
+
+    <div class="nav-right">
+        <div class="user-chip">الأدمن</div>
+        <button class="btn btn-danger" onclick="logout()">تسجيل الخروج</button>
+    </div>
+</nav>
+
+<div class="main-content">
+    <h1 class="page-title">لوحة العرض</h1>
+    <p class="page-subtitle">المستخدمون النشطون، الآلات الشغالة، والجلسات</p>
+
+    <div class="top-actions">
+        <button class="btn btn-secondary" onclick="loadOverview()">تحديث</button>
+    </div>
+
+    <div class="stats-grid" id="overviewStats"></div>
+
+    <div class="section-block" style="margin-top: 24px;">
+        <h2 class="section-title">المستخدمون النشطون</h2>
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Session ID</th>
+                        <th>اسم المستخدم</th>
+                        <th>السيناريو</th>
+                        <th>الحالة</th>
+                        <th>بدأ</th>
+                    </tr>
+                </thead>
+                <tbody id="activeUsersTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section-block">
+        <h2 class="section-title">الآلات الشغالة</h2>
+        <div class="cards-grid" id="runningVmsContainer"></div>
+    </div>
+
+    <div class="section-block">
+        <h2 class="section-title">الجلسات</h2>
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>المستخدم</th>
+                        <th>السيناريو</th>
+                        <th>الحالة</th>
+                        <th>بدأ</th>
+                        <th>انتهى</th>
+                    </tr>
+                </thead>
+                <tbody id="sessionsTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="/static/admin/admin.js"></script>
+<script>
+async function loadOverview() {
+    try {
+        const data = await apiFetch("/api/admin/overview");
+
+        document.getElementById("overviewStats").innerHTML = `
+            <div class="stat-card">
+                <h3>عدد النشطين</h3>
+                <div class="stat-value">${data.active_users_count}</div>
+            </div>
+            <div class="stat-card">
+                <h3>عدد الـ VMs الشغالة</h3>
+                <div class="stat-value">${data.running_vms_count}</div>
+            </div>
+            <div class="stat-card">
+                <h3>إجمالي الجلسات</h3>
+                <div class="stat-value">${data.sessions.length}</div>
+            </div>
+        `;
+
+        const activeUsersTable = document.getElementById("activeUsersTable");
+        activeUsersTable.innerHTML = "";
+
+        if (!data.active_users.length) {
+            activeUsersTable.innerHTML = `
+                <tr>
+                    <td colspan="5"><div class="empty-message">لا يوجد مستخدمون نشطون الآن</div></td>
+                </tr>
+            `;
+        } else {
+            data.active_users.forEach(u => {
+                activeUsersTable.innerHTML += `
+                    <tr>
+                        <td>${u.session_id}</td>
+                        <td>${escapeHtml(u.username || "-")}</td>
+                        <td>${escapeHtml(u.scenario_name || "-")}</td>
+                        <td><span class="status-running">${escapeHtml(u.status)}</span></td>
+                        <td>${formatDate(u.started_at)}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        const runningVmsContainer = document.getElementById("runningVmsContainer");
+        runningVmsContainer.innerHTML = data.running_vms.length
+            ? data.running_vms.map(v => `
+                <div class="card">
+                    <div class="card-title">VM شغالة</div>
+                    <div class="mono">${escapeHtml(v)}</div>
+                </div>
+            `).join("")
+            : `<div class="empty-message">لا توجد آلات شغالة الآن</div>`;
+
+        const sessionsTable = document.getElementById("sessionsTable");
+        sessionsTable.innerHTML = "";
+
+        if (!data.sessions.length) {
+            sessionsTable.innerHTML = `
+                <tr>
+                    <td colspan="6"><div class="empty-message">لا توجد جلسات</div></td>
+                </tr>
+            `;
+        } else {
+            data.sessions.forEach(s => {
+                const cls = s.status === "running" ? "status-running" : "status-ended";
+                sessionsTable.innerHTML += `
+                    <tr>
+                        <td>${s.id}</td>
+                        <td>${escapeHtml(s.username || "-")}</td>
+                        <td>${escapeHtml(s.scenario_name || "-")}</td>
+                        <td><span class="${cls}">${escapeHtml(s.status)}</span></td>
+                        <td>${formatDate(s.started_at)}</td>
+                        <td>${formatDate(s.ended_at)}</td>
+                    </tr>
+                `;
+            });
+        }
+    } catch (err) {
+        showError(err);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", loadOverview);
+</script>
+</body>
+</html>

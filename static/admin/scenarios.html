@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>إدارة السيناريوهات - Cyber Range</title>
+    <link rel="stylesheet" href="/static/admin/admin.css" />
+    <style>
+        .builder-box {
+            border: 1px solid #23385f;
+            border-radius: 14px;
+            padding: 16px;
+            margin-top: 14px;
+            background: rgba(12, 26, 45, 0.28);
+        }
+
+        .machine-card {
+            border: 1px solid #23385f;
+            border-radius: 12px;
+            padding: 14px;
+            margin-top: 14px;
+            background: rgba(12, 26, 45, 0.45);
+        }
+
+        .machine-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .machine-card h4 {
+            margin: 0;
+            color: #dce7ff;
+            font-size: 18px;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .helper-text {
+            color: #9db2d8;
+            font-size: 13px;
+            margin-top: 8px;
+            line-height: 1.8;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .soft-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cfe0ff;
+            font-size: 14px;
+        }
+
+        .mini-note {
+            font-size: 12px;
+            color: #89a2d2;
+            margin-top: 6px;
+        }
+
+        .machine-index {
+            color: #8fb0ff;
+            font-size: 13px;
+        }
+
+        .danger-outline {
+            background: transparent;
+            color: #ff8787;
+            border: 1px solid rgba(255, 107, 107, 0.5);
+        }
+
+        .danger-outline:hover {
+            background: rgba(255, 107, 107, 0.08);
+        }
+
+        .entry-box {
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(77, 123, 255, 0.08);
+            border: 1px solid rgba(77, 123, 255, 0.2);
+        }
+
+        .section-sep {
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <div class="logo">
+            <div class="logo-icon">CR</div>
+            <span>Cyber Range</span>
+        </div>
+        <div class="nav-links">
+            <a class="nav-link" href="/static/admin/dashboard.html">لوحة التحكم</a>
+            <a class="nav-link" href="/static/admin/users.html">إدارة المستخدمين</a>
+            <a class="nav-link active" href="/static/admin/scenarios.html">إدارة السيناريوهات</a>
+            <a class="nav-link" href="/static/admin/platform.html">إدارة المنصة</a>
+            <a class="nav-link" href="/static/admin/overview.html">لوحة العرض</a>
+        </div>
+    </div>
+
+    <div class="nav-right">
+        <div class="user-chip">الأدمن</div>
+        <button class="btn btn-danger" onclick="logout()">تسجيل الخروج</button>
+    </div>
+</nav>
+
+<div class="main-content">
+    <h1 class="page-title">إدارة السيناريوهات</h1>
+    <p class="page-subtitle">إضافة وتعديل وحذف السيناريوهات وربطها بالمقررات وإدارة خطواتها</p>
+
+    <div class="top-actions">
+        <button class="btn btn-primary" onclick="syncScenarios()">مزامنة السيناريوهات</button>
+        <button class="btn btn-secondary" onclick="loadAll()">تحديث الكل</button>
+    </div>
+
+    <div class="section-block">
+        <h2 class="section-title">إضافة مادة</h2>
+        <div class="form-box">
+            <div class="form-grid">
+                <input id="courseCode" placeholder="كود المادة" />
+                <input id="courseName" placeholder="اسم المادة" />
+                <input id="courseDesc" placeholder="وصف المادة" />
+            </div>
+            <div class="top-actions" style="margin-top: 14px;">
+                <button class="btn btn-primary" onclick="createCourse()">إضافة مادة</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-block">
+        <h2 class="section-title">المواد</h2>
+        <div class="cards-grid" id="coursesContainer"></div>
+    </div>
+
+    <div class="section-block">
+        <h2 class="section-title">إضافة سيناريو</h2>
+        <div class="form-box">
+            <div class="form-grid">
+                <input id="scenarioKey" placeholder="scenario_key" />
+                <input id="scenarioName" placeholder="اسم السيناريو" />
+                <select id="scenarioType" onchange="onScenarioTypeChange()">
+                    <option value="vm">VM</option>
+                    <option value="docker">Docker</option>
+                </select>
+                <input id="scenarioDescription" placeholder="الوصف" />
+            </div>
+
+            <div id="vmBuilder" class="builder-box section-sep">
+                <div class="two-col">
+                    <div>
+                        <label class="soft-label">نوع الـ Clone</label>
+                        <select id="cloneType">
+                            <option value="linked">linked</option>
+                            <option value="full">full</option>
+                        </select>
+                    </div>
+
+                    <div class="entry-box">
+                        <label class="soft-label">ماكينة الدخول (Entry Machine)</label>
+                        <select id="entryMachine"></select>
+                        <div class="mini-note">هذه هي الماشين التي سيدخل لها الطالب أولًا.</div>
+                    </div>
+                </div>
+
+                <div class="top-actions" style="margin-top: 14px;">
+                    <button class="btn btn-primary" onclick="addMachineCard()">إضافة ماشين</button>
+                    <button class="btn btn-secondary" onclick="addPresetPair()">إضافة attacker / victim</button>
+                </div>
+
+                <div class="helper-text">
+                    أضف الماشينات بشكل ديناميكي. لكل ماشين حدّد الاسم وملف الـ template ونوع الوصول.
+                </div>
+
+                <div id="machinesContainer"></div>
+            </div>
+
+            <div id="dockerBuilder" class="builder-box section-sep hidden">
+                <label class="soft-label">رفع ملف docker-compose.yml</label>
+                <input id="dockerComposeFile" type="file" accept=".yml,.yaml" />
+                <div class="helper-text">
+                    ارفع ملف docker-compose.yml أو docker-compose.yaml وسيتم حفظه تلقائيًا داخل مجلد السيناريو.
+                </div>
+            </div>
+
+            <div class="top-actions" style="margin-top: 16px;">
+                <button class="btn btn-primary" onclick="createScenario()">إنشاء السيناريو</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-block">
+        <h2 class="section-title">السيناريوهات</h2>
+        <div class="cards-grid" id="scenariosContainer"></div>
+    </div>
+
+    <div class="section-block">
+        <h2 class="section-title">إدارة خطوات السيناريو</h2>
+        <div class="form-box">
+            <div class="form-grid">
+                <input id="stepScenarioId" placeholder="Scenario ID" />
+                <input id="stepOrder" placeholder="ترتيب الخطوة" />
+                <input id="stepTitle" placeholder="عنوان الخطوة" />
+                <input id="stepPoints" placeholder="النقاط" />
+                <select id="stepType">
+                    <option value="info">شرح فقط</option>
+                    <option value="text">إجابة نصية</option>
+                    <option value="flag">Flag</option>
+                </select>
+                <input id="stepPlaceholder" placeholder="Placeholder" />
+            </div>
+
+            <div style="margin-top: 12px;">
+                <textarea id="stepDesc" placeholder="وصف الخطوة"></textarea>
+            </div>
+
+            <div class="form-grid" style="margin-top: 12px;">
+                <input id="stepAnswer" placeholder="الإجابة الصحيحة" />
+                <input id="stepHint" placeholder="Hint" />
+            </div>
+
+            <div class="top-actions" style="margin-top: 14px;">
+                <button class="btn btn-primary" onclick="createStep()">إضافة خطوة</button>
+                <button class="btn btn-secondary" onclick="loadStepsByInput()">عرض خطوات السيناريو</button>
+            </div>
+        </div>
+
+        <div class="cards-grid" id="stepsContainer" style="margin-top: 16px;"></div>
+    </div>
+</div>
+
+<script src="/static/admin/admin.js"></script>
+<script>
+let coursesCache = [];
+let machineCounter = 0;
+
+function onScenarioTypeChange() {
+    const t = document.getElementById("scenarioType").value;
+    document.getElementById("vmBuilder").classList.toggle("hidden", t !== "vm");
+    document.getElementById("dockerBuilder").classList.toggle("hidden", t !== "docker");
+}
+
+function defaultMachineName() {
+    machineCounter += 1;
+    return `machine_${machineCounter}`;
+}
+
+function addMachineCard(prefill = {}) {
+    const container = document.getElementById("machinesContainer");
+    const machineId = `machine-card-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+    const machineName = prefill.name || defaultMachineName();
+    const templateVmx = prefill.template_vmx || "";
+    const access = prefill.access || "internal";
+    const username = prefill.username || "";
+    const password = prefill.password || "";
+    const nicIndex = Number.isInteger(prefill.nic_index) ? prefill.nic_index : 0;
+
+    const card = document.createElement("div");
+    card.className = "machine-card";
+    card.dataset.machineId = machineId;
+
+    card.innerHTML = `
+        <div class="machine-card-header">
+            <div>
+                <h4>بيانات الماشين</h4>
+                <div class="machine-index">${machineId}</div>
+            </div>
+            <button type="button" class="btn danger-outline" onclick="removeMachineCard('${machineId}')">حذف الماشين</button>
+        </div>
+
+        <div class="two-col">
+            <div>
+                <label class="soft-label">اسم الماشين</label>
+                <input class="machine-name" placeholder="مثال: attacker" value="${escapeHtml(machineName)}" oninput="refreshEntryMachineOptions()" />
+            </div>
+
+            <div>
+                <label class="soft-label">template_vmx</label>
+                <input class="machine-template" placeholder="E:/virtual_os/templates/xxx/xxx.vmx" value="${escapeHtml(templateVmx)}" />
+            </div>
+
+            <div>
+                <label class="soft-label">نوع الوصول</label>
+                <select class="machine-access">
+                    <option value="rdp" ${access === "rdp" ? "selected" : ""}>rdp</option>
+                    <option value="ssh" ${access === "ssh" ? "selected" : ""}>ssh</option>
+                    <option value="internal" ${access === "internal" ? "selected" : ""}>internal</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="soft-label">nic_index</label>
+                <input class="machine-nic-index" type="number" min="0" value="${nicIndex}" placeholder="0" />
+            </div>
+
+            <div>
+                <label class="soft-label">username</label>
+                <input class="machine-username" placeholder="اختياري" value="${escapeHtml(username)}" />
+            </div>
+
+            <div>
+                <label class="soft-label">password</label>
+                <input class="machine-password" placeholder="اختياري" value="${escapeHtml(password)}" />
+            </div>
+        </div>
+    `;
+
+    container.appendChild(card);
+    refreshEntryMachineOptions();
+}
+
+function addPresetPair() {
+    addMachineCard({
+        name: "attacker",
+        access: "rdp"
+    });
+    addMachineCard({
+        name: "victim",
+        access: "internal"
+    });
+}
+
+function removeMachineCard(machineId) {
+    const el = document.querySelector(`[data-machine-id="${machineId}"]`);
+    if (el) {
+        el.remove();
+        refreshEntryMachineOptions();
+    }
+}
+
+function refreshEntryMachineOptions() {
+    const entryMachine = document.getElementById("entryMachine");
+    const previousValue = entryMachine.value;
+    const names = [...document.querySelectorAll(".machine-name")]
+        .map(el => el.value.trim())
+        .filter(Boolean);
+
+    entryMachine.innerHTML = "";
+
+    if (!names.length) {
+        entryMachine.innerHTML = `<option value="">لا توجد ماشينات</option>`;
+        return;
+    }
+
+    names.forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        entryMachine.appendChild(opt);
+    });
+
+    if (names.includes(previousValue)) {
+        entryMachine.value = previousValue;
+    }
+}
+
+function collectMachines() {
+    const cards = [...document.querySelectorAll(".machine-card")];
+    if (!cards.length) throw new Error("أضف ماشين واحدة على الأقل");
+
+    const machines = [];
+    const namesSet = new Set();
+
+    cards.forEach((card, index) => {
+        const name = card.querySelector(".machine-name").value.trim();
+        const template_vmx = card.querySelector(".machine-template").value.trim();
+        const access = card.querySelector(".machine-access").value.trim();
+        const username = card.querySelector(".machine-username").value.trim();
+        const password = card.querySelector(".machine-password").value.trim();
+        const nic_index = parseInt(card.querySelector(".machine-nic-index").value || "0");
+
+        if (!name) {
+            throw new Error(`اسم الماشين رقم ${index + 1} مطلوب`);
+        }
+
+        if (namesSet.has(name)) {
+            throw new Error(`اسم الماشين مكرر: ${name}`);
+        }
+        namesSet.add(name);
+
+        if (!template_vmx) {
+            throw new Error(`template_vmx للماكينة ${name} مطلوب`);
+        }
+
+        const machine = { name, template_vmx, access, nic_index };
+        if (username) machine.username = username;
+        if (password) machine.password = password;
+
+        machines.push(machine);
+    });
+
+    return machines;
+}
+
+async function loadAll() {
+    await Promise.all([
+        loadCourses(),
+        loadScenarios()
+    ]);
+}
+
+async function loadCourses() {
+    try {
+        const courses = await apiFetch("/api/admin/courses");
+        coursesCache = courses;
+        const container = document.getElementById("coursesContainer");
+        container.innerHTML = "";
+
+        if (!courses.length) {
+            container.innerHTML = `<div class="empty-message">لا توجد مواد</div>`;
+            return;
+        }
+
+        courses.forEach(c => {
+            container.innerHTML += `
+                <div class="card">
+                    <div class="card-title">${escapeHtml(c.name)}</div>
+                    <div class="card-meta">
+                        الكود: ${escapeHtml(c.code)}<br>
+                        الوصف: ${escapeHtml(c.description || "-")}
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn btn-secondary" onclick="editCourse(${c.id}, '${escapeHtml(c.code)}', '${escapeHtml(c.name)}', '${escapeHtml(c.description || "")}')">تعديل</button>
+                        <button class="btn btn-danger" onclick="deleteCourse(${c.id})">حذف</button>
+                    </div>
+                </div>
+            `;
+        });
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function createCourse() {
+    try {
+        const code = document.getElementById("courseCode").value.trim();
+        const name = document.getElementById("courseName").value.trim();
+        const description = document.getElementById("courseDesc").value.trim();
+
+        await apiFetch("/api/admin/create-course", {
+            method: "POST",
+            body: JSON.stringify({ code, name, description })
+        });
+
+        document.getElementById("courseCode").value = "";
+        document.getElementById("courseName").value = "";
+        document.getElementById("courseDesc").value = "";
+
+        await loadCourses();
+        await loadScenarios();
+        alert("تم إنشاء المادة");
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function editCourse(id, code, name, description) {
+    try {
+        const newCode = prompt("كود المادة:", code);
+        if (newCode === null) return;
+
+        const newName = prompt("اسم المادة:", name);
+        if (newName === null) return;
+
+        const newDesc = prompt("وصف المادة:", description ?? "");
+        if (newDesc === null) return;
+
+        await apiFetch(`/api/admin/update-course/${id}`, {
+            method: "PUT",
+            body: JSON.stringify({
+                code: newCode.trim(),
+                name: newName.trim(),
+                description: newDesc.trim()
+            })
+        });
+
+        await loadCourses();
+        await loadScenarios();
+        alert("تم تعديل المادة");
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function deleteCourse(id) {
+    if (!confirm("هل تريد حذف المادة؟")) return;
+
+    try {
+        await apiFetch(`/api/admin/delete-course/${id}`, { method: "DELETE" });
+        await loadCourses();
+        await loadScenarios();
+        alert("تم حذف المادة");
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function syncScenarios() {
+    try {
+        const res = await apiFetch("/api/admin/sync-scenarios", { method: "POST" });
+        await loadScenarios();
+        alert(`تمت المزامنة بنجاح. العدد: ${res.synced}`);
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function loadScenarios() {
+    try {
+        const scenarios = await apiFetch("/api/admin/scenarios");
+        const container = document.getElementById("scenariosContainer");
+        container.innerHTML = "";
+
+        if (!scenarios.length) {
+            container.innerHTML = `<div class="empty-message">لا توجد سيناريوهات</div>`;
+            return;
+        }
+
+        scenarios.forEach(s => {
+            const options = [
+                `<option value="">بدون مادة</option>`,
+                ...coursesCache.map(c => `
+                    <option value="${c.id}" ${s.course_id === c.id ? "selected" : ""}>
+                        ${escapeHtml(c.name)}
+                    </option>
+                `)
+            ].join("");
+
+            container.innerHTML += `
+                <div class="card">
+                    <span class="badge ${s.type === 'vm' ? 'badge-vm' : 'badge-docker'}">
+                        ${s.type === "vm" ? "VM" : "Docker"}
+                    </span>
+
+                    <div class="card-title">${escapeHtml(s.name)}</div>
+                    <div class="card-meta">
+                        المفتاح: ${escapeHtml(s.scenario_key)}<br>
+                        ID: ${s.id}<br>
+                        المسار: ${escapeHtml(s.path)}<br>
+                        المادة الحالية: ${escapeHtml(s.course_name || "بدون مادة")}<br>
+                        الوصف: ${escapeHtml(s.description || "-")}
+                    </div>
+
+                    <div style="margin-top: 10px;">
+                        <select onchange="assignCourse(${s.id}, this.value)">
+                            ${options}
+                        </select>
+                    </div>
+
+                    <div class="card-actions" style="margin-top: 12px;">
+                        <button class="btn btn-secondary" onclick="editScenario(${s.id}, '${escapeHtml(s.name)}', '${escapeHtml(s.description || "")}')">تعديل</button>
+                        <button class="btn btn-success" onclick="prepareSteps(${s.id})">إدارة الخطوات</button>
+                        <button class="btn btn-danger" onclick="deleteScenario(${s.id}, '${escapeHtml(s.name)}')">حذف</button>
+                    </div>
+                </div>
+            `;
+        });
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function assignCourse(scenarioId, courseId) {
+    try {
+        await apiFetch("/api/admin/assign-scenario-course", {
+            method: "POST",
+            body: JSON.stringify({
+                scenario_id: scenarioId,
+                course_id: courseId ? parseInt(courseId) : null
+            })
+        });
+        await loadScenarios();
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function createScenario() {
+    try {
+        const scenario_key = document.getElementById("scenarioKey").value.trim();
+        const name = document.getElementById("scenarioName").value.trim();
+        const type = document.getElementById("scenarioType").value;
+        const description = document.getElementById("scenarioDescription").value.trim();
+
+        if (!scenario_key || !name) {
+            alert("أدخل scenario_key واسم السيناريو");
+            return;
+        }
+
+        if (type === "vm") {
+            const machines = collectMachines();
+            const entry_machine = document.getElementById("entryMachine").value;
+            const clone_type = document.getElementById("cloneType").value;
+
+            if (!entry_machine) {
+                alert("حدد ماكينة الدخول");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("scenario_key", scenario_key);
+            formData.append("name", name);
+            formData.append("description", description);
+            formData.append("clone_type", clone_type);
+            formData.append("entry_machine", entry_machine);
+            formData.append("machines_json", JSON.stringify(machines));
+
+            const res = await fetch("/api/admin/create-scenario-vm", {
+                method: "POST",
+                credentials: "include",
+                body: formData
+            });
+
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+        } else {
+            const fileInput = document.getElementById("dockerComposeFile");
+            if (!fileInput.files.length) {
+                alert("ارفع docker-compose.yml أولًا");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("scenario_key", scenario_key);
+            formData.append("name", name);
+            formData.append("description", description);
+            formData.append("docker_compose_file", fileInput.files[0]);
+
+            const res = await fetch("/api/admin/create-scenario-docker", {
+                method: "POST",
+                credentials: "include",
+                body: formData
+            });
+
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+        }
+
+        document.getElementById("scenarioKey").value = "";
+        document.getElementById("scenarioName").value = "";
+        document.getElementById("scenarioDescription").value = "";
+        document.getElementById("dockerComposeFile").value = "";
+        document.getElementById("machinesContainer").innerHTML = "";
+        document.getElementById("entryMachine").innerHTML = "";
+        machineCounter = 0;
+
+        addMachineCard({ name: "attacker", access: "rdp" });
+        refreshEntryMachineOptions();
+
+        await loadScenarios();
+        alert("تم إنشاء السيناريو");
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function editScenario(id, name, description) {
+    try {
+        const newName = prompt("اسم السيناريو:", name);
+        if (newName === null) return;
+
+        const newDesc = prompt("وصف السيناريو:", description ?? "");
+        if (newDesc === null) return;
+
+        await apiFetch(`/api/admin/update-scenario/${id}`, {
+            method: "PUT",
+            body: JSON.stringify({
+                name: newName.trim(),
+                description: newDesc.trim()
+            })
+        });
+
+        await loadScenarios();
+        alert("تم تعديل السيناريو");
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function deleteScenario(id, name) {
+    if (!confirm(`هل تريد حذف السيناريو: ${name} ؟`)) return;
+
+    try {
+        await apiFetch(`/api/admin/delete-scenario/${id}`, { method: "DELETE" });
+        await loadScenarios();
+        document.getElementById("stepsContainer").innerHTML = "";
+        alert("تم حذف السيناريو");
+    } catch (err) {
+        showError(err);
+    }
+}
+
+function prepareSteps(scenarioId) {
+    document.getElementById("stepScenarioId").value = scenarioId;
+    loadSteps(scenarioId);
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+}
+
+function loadStepsByInput() {
+    const scenarioId = document.getElementById("stepScenarioId").value.trim();
+    if (!scenarioId) {
+        alert("أدخل Scenario ID أولًا");
+        return;
+    }
+    loadSteps(scenarioId);
+}
+
+async function loadSteps(scenarioId) {
+    try {
+        const steps = await apiFetch(`/api/admin/scenario-steps/${scenarioId}`);
+        const container = document.getElementById("stepsContainer");
+        container.innerHTML = "";
+
+        if (!steps.length) {
+            container.innerHTML = `<div class="empty-message">لا توجد خطوات لهذا السيناريو</div>`;
+            return;
+        }
+
+        steps.forEach(s => {
+            container.innerHTML += `
+                <div class="card">
+                    <div class="card-title">${escapeHtml(s.title)}</div>
+                    <div class="card-meta">
+                        ID: ${s.id}<br>
+                        Scenario ID: ${s.scenario_id}<br>
+                        الترتيب: ${s.step_order}<br>
+                        النقاط: ${s.points}<br>
+                        النوع: ${escapeHtml(s.answer_type)}<br>
+                        الوصف: ${escapeHtml(s.description || "-")}<br>
+                        الإجابة الصحيحة: ${escapeHtml(s.correct_answer || "-")}<br>
+                        Placeholder: ${escapeHtml(s.placeholder || "-")}<br>
+                        Hint: ${escapeHtml(s.hint || "-")}<br>
+                        Required: ${s.is_required ? "نعم" : "لا"}
+                    </div>
+
+                    <div class="card-actions">
+                        <button class="btn btn-secondary" onclick='editStep(${JSON.stringify(s)})'>تعديل</button>
+                        <button class="btn btn-danger" onclick="deleteStep(${s.id}, ${scenarioId})">حذف</button>
+                    </div>
+                </div>
+            `;
+        });
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function createStep() {
+    try {
+        const payload = {
+            scenario_id: parseInt(document.getElementById("stepScenarioId").value || "0"),
+            step_order: document.getElementById("stepOrder").value ? parseInt(document.getElementById("stepOrder").value) : null,
+            title: document.getElementById("stepTitle").value.trim(),
+            description: document.getElementById("stepDesc").value.trim(),
+            points: parseInt(document.getElementById("stepPoints").value || "0"),
+            answer_type: document.getElementById("stepType").value,
+            correct_answer: document.getElementById("stepAnswer").value.trim(),
+            placeholder: document.getElementById("stepPlaceholder").value.trim(),
+            hint: document.getElementById("stepHint").value.trim(),
+            is_required: true
+        };
+
+        await apiFetch("/api/admin/create-step", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+
+        document.getElementById("stepOrder").value = "";
+        document.getElementById("stepTitle").value = "";
+        document.getElementById("stepDesc").value = "";
+        document.getElementById("stepPoints").value = "";
+        document.getElementById("stepAnswer").value = "";
+        document.getElementById("stepPlaceholder").value = "";
+        document.getElementById("stepHint").value = "";
+
+        await loadSteps(payload.scenario_id);
+        alert("تمت إضافة الخطوة");
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function editStep(step) {
+    try {
+        const title = prompt("عنوان الخطوة:", step.title);
+        if (title === null) return;
+
+        const description = prompt("وصف الخطوة:", step.description || "");
+        if (description === null) return;
+
+        const points = prompt("النقاط:", String(step.points ?? 0));
+        if (points === null) return;
+
+        const answer_type = prompt("نوع الإجابة (info / text / flag):", step.answer_type);
+        if (answer_type === null) return;
+
+        const correct_answer = prompt("الإجابة الصحيحة:", step.correct_answer || "");
+        if (correct_answer === null) return;
+
+        const placeholder = prompt("Placeholder:", step.placeholder || "");
+        if (placeholder === null) return;
+
+        const hint = prompt("Hint:", step.hint || "");
+        if (hint === null) return;
+
+        const step_order = prompt("ترتيب الخطوة:", String(step.step_order));
+        if (step_order === null) return;
+
+        await apiFetch(`/api/admin/update-step/${step.id}`, {
+            method: "PUT",
+            body: JSON.stringify({
+                title: title.trim(),
+                description: description.trim(),
+                points: parseInt(points || "0"),
+                answer_type: answer_type.trim(),
+                correct_answer: correct_answer.trim(),
+                placeholder: placeholder.trim(),
+                hint: hint.trim(),
+                step_order: parseInt(step_order || "1"),
+                is_required: step.is_required
+            })
+        });
+
+        await loadSteps(step.scenario_id);
+        alert("تم تعديل الخطوة");
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function deleteStep(id, scenarioId) {
+    if (!confirm("هل تريد حذف الخطوة؟")) return;
+
+    try {
+        await apiFetch(`/api/admin/delete-step/${id}`, { method: "DELETE" });
+        await loadSteps(scenarioId);
+        alert("تم حذف الخطوة");
+    } catch (err) {
+        showError(err);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    onScenarioTypeChange();
+    addMachineCard({ name: "attacker", access: "rdp" });
+    refreshEntryMachineOptions();
+    await loadAll();
+});
+</script>
+</body>
+</html>

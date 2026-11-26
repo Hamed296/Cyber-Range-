@@ -1,0 +1,24 @@
+{
+  "scenario_key": "attack_lab",
+  "name": "Attack Lab",
+  "description": "Kali attacker against Windows victim",
+  "type": "vm",
+  "vmware": {
+    "clone_type": "linked",
+    "entry_machine": "attacker",
+    "machines": [
+      {
+        "name": "attacker",
+        "template_vmx": "E:/virtual_os/templates/kali/kali.vmx",
+        "access": "rdp",
+        "username": "student",
+        "password": "Cyber1234"
+      },
+      {
+        "name": "victim",
+        "template_vmx": "E:/virtual_os/templates/win10/win10.vmx",
+        "access": "internal"
+      }
+    ]
+  }
+}

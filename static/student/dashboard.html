@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>لوحة الطالب - Cyber Range</title>
+    <link rel="stylesheet" href="/static/student/student.css" />
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <div class="logo">
+            <img src="/static/logo2.png" class="header-logo" alt="logo" />
+            <span>Cyber Range</span>
+        </div>
+        <div class="nav-links">
+            <a href="/static/student/dashboard.html" class="nav-link active">لوحة الطالب</a>
+        </div>
+    </div>
+
+    <div class="nav-right">
+        <div class="user-info">
+            <div class="user-avatar" id="userAvatar">ط</div>
+            <span id="userName">الطالب</span>
+        </div>
+        <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+    </div>
+</nav>
+
+<div class="main-content">
+    <h1 class="page-title">لوحة الطالب</h1>
+
+    <h2 class="section-title"> المواد المتوفرة</h2>
+    <div class="cards-container" id="coursesContainer"></div>
+
+    <h2 class="section-title"> السيناريوهات العامة</h2>
+    <div class="cards-container" id="generalScenariosContainer"></div>
+</div>
+
+<script src="/static/student/student.js"></script>
+<script>
+const userName = document.getElementById("userName");
+const userAvatar = document.getElementById("userAvatar");
+const coursesContainer = document.getElementById("coursesContainer");
+const generalScenariosContainer = document.getElementById("generalScenariosContainer");
+
+function renderCourseCards(courses) {
+    coursesContainer.innerHTML = "";
+    if (!courses.length) {
+        coursesContainer.innerHTML = `<div class="empty-message">لا توجد مواد متوفرة حاليًا</div>`;
+        return;
+    }
+
+    courses.forEach(course => {
+        coursesContainer.innerHTML += `
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">${escapeHtml(course.name)}</div>
+                        <div class="card-subtitle">${escapeHtml(course.code || "")}</div>
+                    </div>
+                </div>
+
+                <div class="card-description">
+                    ${escapeHtml(course.description || "لا يوجد وصف لهذه المادة.")}
+                </div>
+
+                <div class="card-footer">
+                    <span class="course-badge">عدد السيناريوهات: ${course.scenarios_count}</span>
+                    <a class="btn btn-secondary" href="/static/student/course.html?course_id=${course.id}">
+                        دخول المادة
+                    </a>
+                </div>
+            </div>
+        `;
+    });
+}
+
+function renderScenarioCards(items) {
+    generalScenariosContainer.innerHTML = "";
+    if (!items.length) {
+        generalScenariosContainer.innerHTML = `<div class="empty-message">لا توجد سيناريوهات عامة حاليًا</div>`;
+        return;
+    }
+
+    items.forEach(item => {
+        generalScenariosContainer.innerHTML += `
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">${escapeHtml(item.name)}</div>
+                        <div class="card-subtitle">ID: ${item.id}</div>
+                    </div>
+                    <span class="card-type type-${item.type}">
+                        ${item.type === "docker" ? "Docker" : "VM"}
+                    </span>
+                </div>
+
+                <div class="card-description">
+                    ${escapeHtml(item.description || "سيناريو تدريبي عملي داخل بيئة معزولة.")}
+                </div>
+
+                <div class="card-footer">
+                    <span class="course-badge">عام</span>
+                    <a class="btn" href="/static/student/scenario.html?scenario_id=${item.id}">
+                        تفاصيل السيناريو
+                    </a>
+                </div>
+            </div>
+        `;
+    });
+}
+
+async function loadDashboard() {
+    try {
+        const dash = await apiFetch(API_ENDPOINTS.dashboard());
+
+        userName.textContent = `الطالب: ${dash.user.username}`;
+        userAvatar.textContent = dash.user.username?.trim()?.[0] || "ط";
+
+        renderCourseCards(dash.courses || []);
+        renderScenarioCards(dash.general_scenarios || []);
+    } catch (err) {
+        window.location.href = "/static/login.html";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", loadDashboard);
+</script>
+</body>
+</html>

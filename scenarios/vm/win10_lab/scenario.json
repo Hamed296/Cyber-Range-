@@ -1,0 +1,13 @@
+{
+  "scenario_key": "win10_lab",
+  "name": "Windows 10 Lab",
+  "type": "vm",
+  "vmware": {
+    "template_vmx": "E:/virtual_os/templates/Windows_malware/win10.vmx",
+    "clone_type": "linked",
+    "access": "rdp",
+    "rdp_user": "student",
+    "rdp_pass": "cyber123",
+    "rdp_port": 3389
+  }
+}

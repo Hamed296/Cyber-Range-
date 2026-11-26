@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>إدارة المستخدمين - Cyber Range</title>
+    <link rel="stylesheet" href="/static/admin/admin.css" />
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <div class="logo">
+            <div class="logo-icon">CR</div>
+            <span>Cyber Range</span>
+        </div>
+        <div class="nav-links">
+            <a class="nav-link" href="/static/admin/dashboard.html">لوحة التحكم</a>
+            <a class="nav-link active" href="/static/admin/users.html">إدارة المستخدمين</a>
+            <a class="nav-link" href="/static/admin/scenarios.html">إدارة السيناريوهات</a>
+            <a class="nav-link" href="/static/admin/platform.html">إدارة المنصة</a>
+            <a class="nav-link" href="/static/admin/overview.html">لوحة العرض</a>
+        </div>
+    </div>
+
+    <div class="nav-right">
+        <div class="user-chip">الأدمن</div>
+        <button class="btn btn-danger" onclick="logout()">تسجيل الخروج</button>
+    </div>
+</nav>
+
+<div class="main-content">
+    <h1 class="page-title">إدارة المستخدمين</h1>
+    <p class="page-subtitle">عرض الطلاب، البحث عنهم، تعديلهم، حذفهم، وعرض الإحصائيات</p>
+
+    <div class="section-block">
+        <h2 class="section-title">إضافة طالب</h2>
+        <div class="form-box">
+            <div class="form-grid">
+                <input id="studentUsername" placeholder="اسم المستخدم" />
+                <input id="studentPassword" placeholder="كلمة المرور" />
+            </div>
+            <div class="top-actions" style="margin-top: 14px;">
+                <button class="btn btn-primary" onclick="createStudent()">إضافة طالب</button>
+                <button class="btn btn-secondary" onclick="loadStudents()">تحديث</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-block">
+        <h2 class="section-title">جدول الطلاب</h2>
+
+        <div class="search-row">
+            <input id="studentSearch" placeholder="ابحث باسم الطالب..." oninput="loadStudents()" />
+        </div>
+
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>اسم المستخدم</th>
+                        <th>الدور</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="side-panel" id="studentStatsPanel"></div>
+</div>
+
+<script src="/static/admin/admin.js"></script>
+<script>
+async function loadStudents() {
+    try {
+        const q = document.getElementById("studentSearch").value.trim();
+        const students = q
+            ? await apiFetch(`/api/admin/students-search?q=${encodeURIComponent(q)}`)
+            : await apiFetch("/api/admin/students");
+
+        const body = document.getElementById("studentsTableBody");
+        body.innerHTML = "";
+
+        if (!students.length) {
+            body.innerHTML = `
+                <tr>
+                    <td colspan="4">
+                        <div class="empty-message">لا يوجد طلاب</div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        students.forEach(s => {
+            body.innerHTML += `
+                <tr>
+                    <td>${s.id}</td>
+                    <td>
+                        <button class="table-link-btn" onclick="showStudentStats(${s.id})">
+                            ${escapeHtml(s.username)}
+                        </button>
+                    </td>
+                    <td>${escapeHtml(s.role)}</td>
+                    <td>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" onclick="editStudent(${s.id}, '${escapeHtml(s.username)}')">تعديل</button>
+                            <button class="btn btn-danger" onclick="deleteStudent(${s.id}, '${escapeHtml(s.username)}')">حذف</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function createStudent() {
+    try {
+        const username = document.getElementById("studentUsername").value.trim();
+        const password = document.getElementById("studentPassword").value.trim();
+
+        await apiFetch("/api/admin/create-student", {
+            method: "POST",
+            body: JSON.stringify({ username, password })
+        });
+
+        document.getElementById("studentUsername").value = "";
+        document.getElementById("studentPassword").value = "";
+        await loadStudents();
+        alert("تم إنشاء الطالب");
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function editStudent(id, currentUsername) {
+    try {
+        const username = prompt("اسم المستخدم الجديد:", currentUsername);
+        if (username === null) return;
+
+        const password = prompt("كلمة المرور الجديدة (اتركها فارغة بدون تغيير):", "");
+
+        await apiFetch(`/api/admin/update-student/${id}`, {
+            method: "PUT",
+            body: JSON.stringify({
+                username: username.trim(),
+                password: password
+            })
+        });
+
+        await loadStudents();
+        alert("تم تعديل الطالب");
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function deleteStudent(id, username) {
+    if (!confirm(`هل تريد حذف الطالب: ${username} ؟`)) return;
+
+    try {
+        await apiFetch(`/api/admin/delete-student/${id}`, { method: "DELETE" });
+        await loadStudents();
+        document.getElementById("studentStatsPanel").innerHTML = "";
+        alert("تم حذف الطالب");
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function showStudentStats(studentId) {
+    try {
+        const stats = await apiFetch(`/api/admin/student-stats/${studentId}`);
+        const panel = document.getElementById("studentStatsPanel");
+
+        const scenariosHtml = (stats.joined_scenarios || []).length
+            ? stats.joined_scenarios.map(s => `<div class="kv-item">#${s.id} - ${escapeHtml(s.name)}</div>`).join("")
+            : `<div class="empty-message">لا توجد سيناريوهات شارك فيها الطالب</div>`;
+
+        const sessionsHtml = (stats.latest_sessions || []).length
+            ? `
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Session ID</th>
+                                <th>السيناريو</th>
+                                <th>الحالة</th>
+                                <th>بدأ</th>
+                                <th>انتهى</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${stats.latest_sessions.map(s => `
+                                <tr>
+                                    <td>${s.id}</td>
+                                    <td>${escapeHtml(s.scenario_name || "-")}</td>
+                                    <td>${escapeHtml(s.status)}</td>
+                                    <td>${formatDate(s.started_at)}</td>
+                                    <td>${formatDate(s.ended_at)}</td>
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                </div>
+            `
+            : `<div class="empty-message">لا توجد جلسات</div>`;
+
+        panel.innerHTML = `
+            <div class="stats-box">
+                <h2 class="section-title">إحصائيات الطالب: ${escapeHtml(stats.username)}</h2>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>إجمالي الجلسات</h3>
+                        <div class="stat-value">${stats.total_sessions}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>الجلسات النشطة</h3>
+                        <div class="stat-value">${stats.running_sessions}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>الجلسات المنتهية</h3>
+                        <div class="stat-value">${stats.ended_sessions}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>الخطوات المكتملة</h3>
+                        <div class="stat-value">${stats.completed_steps}</div>
+                    </div>
+                </div>
+
+                <hr class="sep" />
+
+                <h2 class="section-title">السيناريوهات التي شارك بها</h2>
+                <div class="kv-list">${scenariosHtml}</div>
+
+                <hr class="sep" />
+
+                <h2 class="section-title">آخر الجلسات</h2>
+                ${sessionsHtml}
+            </div>
+        `;
+
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    } catch (err) {
+        showError(err);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", loadStudents);
+</script>
+</body>
+</html>

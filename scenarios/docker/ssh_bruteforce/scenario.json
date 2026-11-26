@@ -1,0 +1,5 @@
+{
+  "scenario_key": "ssh_bruteforce",
+  "name": "SSH Brute Force (Docker)",
+  "type": "docker"
+}

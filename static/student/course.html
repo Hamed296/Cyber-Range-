@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>سيناريوهات المادة - Cyber Range</title>
+    <link rel="stylesheet" href="/static/student/student.css" />
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <div class="logo">
+            <img src="/static/logo2.png" class="header-logo" alt="logo" />
+            <span>Cyber Range</span>
+        </div>
+        <div class="nav-links">
+            <a href="/static/student/dashboard.html" class="nav-link">لوحة الطالب</a>
+            <a href="#" class="nav-link active">المادة</a>
+        </div>
+    </div>
+
+    <div class="nav-right">
+        <div class="user-info">
+            <div class="user-avatar" id="userAvatar">ط</div>
+            <span id="userName">الطالب</span>
+        </div>
+        <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+    </div>
+</nav>
+
+<div class="main-content">
+    <a class="back-link" href="/static/student/dashboard.html">← العودة إلى لوحة الطالب</a>
+
+    <h1 class="page-title" id="courseTitle">المادة</h1>
+    <p class="page-subtitle" id="courseDesc">تحميل بيانات المادة...</p>
+
+    <h2 class="section-title">📋 السيناريوهات التابعة للمادة</h2>
+    <div class="cards-container" id="courseScenariosContainer"></div>
+</div>
+
+<script src="/static/student/student.js"></script>
+<script>
+const courseId = qs("course_id");
+const userName = document.getElementById("userName");
+const userAvatar = document.getElementById("userAvatar");
+const courseTitle = document.getElementById("courseTitle");
+const courseDesc = document.getElementById("courseDesc");
+const courseScenariosContainer = document.getElementById("courseScenariosContainer");
+
+async function loadHeaderUser() {
+    try {
+        const dash = await apiFetch(API_ENDPOINTS.dashboard());
+        userName.textContent = `الطالب: ${dash.user.username}`;
+        userAvatar.textContent = dash.user.username?.trim()?.[0] || "ط";
+    } catch (err) {
+        window.location.href = "/static/login.html";
+    }
+}
+
+async function loadCoursePage() {
+    if (!courseId) {
+        courseScenariosContainer.innerHTML = `<div class="empty-message">المادة غير محددة</div>`;
+        return;
+    }
+
+    try {
+        const data = await apiFetch(API_ENDPOINTS.courseScenarios(courseId));
+
+        courseTitle.textContent = data.course.name;
+        courseDesc.textContent = data.course.description || "لا يوجد وصف لهذه المادة.";
+
+        const scenarios = data.scenarios || [];
+        courseScenariosContainer.innerHTML = "";
+
+        if (!scenarios.length) {
+            courseScenariosContainer.innerHTML = `<div class="empty-message">لا توجد سيناريوهات لهذه المادة حاليًا</div>`;
+            return;
+        }
+
+        scenarios.forEach(item => {
+            courseScenariosContainer.innerHTML += `
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">${escapeHtml(item.name)}</div>
+                            <div class="card-subtitle">ID: ${item.id}</div>
+                        </div>
+                        <span class="card-type type-${item.type}">
+                            ${item.type === "docker" ? "Docker" : "VM"}
+                        </span>
+                    </div>
+
+                    <span class="course-badge">${escapeHtml(data.course.name)}</span>
+
+                    <div class="card-description">
+                        ${escapeHtml(item.description || "سيناريو تدريبي عملي داخل بيئة معزولة.")}
+                    </div>
+
+                    <div class="card-footer">
+                        <span></span>
+                        <a class="btn" href="/static/student/scenario.html?scenario_id=${item.id}">
+                            تفاصيل السيناريو
+                        </a>
+                    </div>
+                </div>
+            `;
+        });
+    } catch (err) {
+        courseScenariosContainer.innerHTML = `<div class="empty-message">${escapeHtml(err.message)}</div>`;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadHeaderUser();
+    await loadCoursePage();
+});
+</script>
+</body>
+</html>

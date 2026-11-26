@@ -1,0 +1,24 @@
+services:
+  victim:
+    image: lscr.io/linuxserver/openssh-server:latest
+    container_name: "${PROJECT_NAME}_victim"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+      - PASSWORD_ACCESS=true
+      - USER_NAME=victim
+      - USER_PASSWORD=victim123
+    ports:
+      - "${VICTIM_SSH_PORT}:2222"
+    restart: unless-stopped
+
+  attacker:
+    image: tsl0922/ttyd:latest
+    container_name: "${PROJECT_NAME}_attacker"
+    depends_on:
+      - victim
+    ports:
+      - "${TTYD_PORT}:7681"
+    command: ["ttyd","-W", "-p", "7681", "bash"]
+    restart: unless-stopped

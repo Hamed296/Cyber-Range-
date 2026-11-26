@@ -1,0 +1,20 @@
+{
+  "scenario_key": "8",
+  "name": "network",
+  "description": "aaaaa",
+  "type": "vm",
+  "vmware": {
+    "clone_type": "linked",
+    "entry_machine": "attacker",
+    "machines": [
+      {
+        "name": "attacker",
+        "template_vmx": "E:/virtual_os/templates/kali/kali.vmx",
+        "access": "rdp",
+        "nic_index": 0,
+        "username": "kali",
+        "password": "kali"
+      }
+    ]
+  }
+}

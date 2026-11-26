@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>تفاصيل السيناريو - Cyber Range</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0c1a2d;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .navbar {
+            background-color: #0a1423;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1a2d4d;
+            gap: 15px;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 600;
+            color: #4d7bff;
+        }
+
+        .header-logo {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            display: block;
+            mix-blend-mode: screen;
+            filter: drop-shadow(0 0 8px rgba(77, 123, 255, 0.35));
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-link {
+            color: #8ca0c7;
+            font-size: 16px;
+            padding: 8px 15px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .nav-link.active {
+            background-color: rgba(77, 123, 255, 0.2);
+            color: #4d7bff;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #8ca0c7;
+            font-size: 14px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background-color: #4d7bff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #ff5252;
+        }
+
+        .main-content {
+            padding: 30px;
+            max-width: 1450px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 18px;
+            color: #8fb0ff;
+            font-size: 14px;
+        }
+
+        .scenario-page-top {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 20px;
+            margin-bottom: 22px;
+        }
+
+        .info-box,
+        .stats-box,
+        .runtime-box,
+        .steps-box,
+        .waiting-box {
+            background-color: #152642;
+            border-radius: 14px;
+            padding: 22px;
+            border: 1px solid #1a2d4d;
+        }
+
+        .page-title {
+            font-size: 30px;
+            color: #e8eeff;
+            margin-bottom: 10px;
+        }
+
+        .meta-line {
+            color: #8ca0c7;
+            margin-top: 8px;
+            line-height: 1.9;
+        }
+
+        .btn-row {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background-color: #4d7bff;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #5a85ff;
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid #4d7bff;
+            color: #4d7bff;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(77, 123, 255, 0.12);
+        }
+
+        .btn-danger {
+            background-color: #ff6b6b;
+        }
+
+        .btn-danger:hover {
+            background-color: #ff5252;
+        }
+
+        .big-status {
+            font-size: 15px;
+            color: #d8e2ff;
+            margin-bottom: 12px;
+        }
+
+        .status-running {
+            color: #4cd19b;
+            font-weight: bold;
+        }
+
+        .status-stopped {
+            color: #ff8d8d;
+            font-weight: bold;
+        }
+
+        .status-starting {
+            color: #ffd166;
+            font-weight: bold;
+        }
+
+        .timer-pill {
+            display: inline-block;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 8px 12px;
+            border-radius: 999px;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .waiting-box {
+            margin-bottom: 22px;
+            display: none;
+        }
+
+        .waiting-title {
+            color: #ffd166;
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .waiting-text {
+            color: #dce7ff;
+            line-height: 1.9;
+            margin-bottom: 14px;
+        }
+
+        .progress-outer {
+            width: 100%;
+            height: 18px;
+            border-radius: 999px;
+            background: #0a1423;
+            border: 1px solid #1a2d4d;
+            overflow: hidden;
+        }
+
+        .progress-inner {
+            width: 0%;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #4d7bff, #7aa2ff);
+            transition: width 0.35s ease;
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 10px;
+            color: #9eb3dc;
+            font-size: 13px;
+            flex-wrap: wrap;
+        }
+
+        .runtime-box {
+            margin-bottom: 22px;
+        }
+
+        .runtime-title {
+            color: #4d7bff;
+            font-size: 20px;
+            margin-bottom: 14px;
+        }
+
+        .runtime-frame {
+            width: 100%;
+            height: 540px;
+            border: 1px solid #1a2d4d;
+            border-radius: 12px;
+            background: #08111d;
+        }
+
+        .rdp-panel,
+        .ssh-panel,
+        .note-panel {
+            background: rgba(12, 26, 45, 0.45);
+            border: 1px solid #1a2d4d;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            line-height: 1.9;
+            color: #d6e2ff;
+        }
+
+        .mono-box {
+            background: #0a1423;
+            border: 1px solid #1a2d4d;
+            color: #d6e2ff;
+            border-radius: 8px;
+            padding: 12px;
+            direction: ltr;
+            text-align: left;
+            word-break: break-all;
+            font-family: Consolas, monospace;
+            margin-top: 10px;
+        }
+
+        .steps-title {
+            font-size: 24px;
+            color: #4d7bff;
+            margin-bottom: 18px;
+        }
+
+        .steps-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .step-card {
+            background: rgba(12, 26, 45, 0.55);
+            border: 1px solid #1a2d4d;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .step-title {
+            font-size: 18px;
+            color: #e8eeff;
+            margin-bottom: 4px;
+        }
+
+        .step-order {
+            color: #4d7bff;
+            font-size: 13px;
+        }
+
+        .step-score {
+            background: rgba(77, 123, 255, 0.18);
+            color: #8fb0ff;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .step-desc {
+            color: #c8d3ee;
+            line-height: 1.9;
+            margin-bottom: 14px;
+            font-size: 14px;
+        }
+
+        .step-hint {
+            color: #ffd166;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .step-answer-box {
+            display: grid;
+            gap: 10px;
+        }
+
+        .step-answer-box input {
+            width: 100%;
+            background: #0a1423;
+            border: 1px solid #1a2d4d;
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .step-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .step-status {
+            margin-top: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .step-status.correct {
+            color: #4cd19b;
+        }
+
+        .step-status.wrong {
+            color: #ff6b6b;
+        }
+
+        .step-status.pending {
+            color: #8ca0c7;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8ca0c7;
+            font-size: 16px;
+            background-color: rgba(12, 26, 45, 0.5);
+            border-radius: 12px;
+            border: 2px dashed #1a2d4d;
+        }
+
+        @media (max-width: 920px) {
+            .scenario-page-top {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .nav-left,
+            .nav-right,
+            .nav-links {
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .step-header {
+                flex-direction: column;
+            }
+
+            .runtime-frame {
+                height: 420px;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <div class="logo">
+            <img src="/static/logo2.png" class="header-logo" alt="logo" />
+            <span>Cyber Range</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="/static/student/dashboard.html" class="nav-link">لوحة الطالب</a>
+            <a href="#" class="nav-link active">تفاصيل السيناريو</a>
+        </div>
+    </div>
+
+    <div class="nav-right">
+        <div class="user-info">
+            <div class="user-avatar" id="userAvatar">ط</div>
+            <span id="userName">الطالب</span>
+        </div>
+        <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+    </div>
+</nav>
+
+<div class="main-content">
+    <a class="back-link" id="backLink" href="/static/student/dashboard.html">← العودة</a>
+
+    <div class="scenario-page-top">
+        <div class="info-box">
+            <h1 class="page-title" id="scenarioTitle">تفاصيل السيناريو</h1>
+
+            <div class="meta-line" id="scenarioMeta"></div>
+            <div class="meta-line" id="scenarioDescription" style="margin-top:16px;"></div>
+
+            <div class="btn-row">
+                <button class="btn" id="startBtn">تشغيل السيناريو</button>
+                <button class="btn btn-danger" id="endBtn" style="display:none;">إنهاء السيناريو</button>
+                <a class="btn btn-secondary" id="rdpBtn" style="display:none;" href="#">تحميل RDP</a>
+                <button class="btn btn-secondary" id="copySshBtn" style="display:none;">نسخ SSH</button>
+            </div>
+        </div>
+
+        <div class="stats-box">
+            <div class="big-status">
+                الحالة:
+                <strong id="scenarioStatus" class="status-stopped">غير مشغل</strong>
+            </div>
+
+            <div class="meta-line">النوع: <span id="scenarioType">-</span></div>
+            <div class="meta-line">المادة: <span id="scenarioCourse">بدون مادة</span></div>
+            <div class="meta-line">عدد الخطوات: <span id="stepsCount">0</span></div>
+            <div class="meta-line">مجموع النقاط: <span id="totalPoints">0</span></div>
+            <div class="meta-line">Session ID: <span id="sessionIdText">-</span></div>
+            <div class="meta-line">المدة: <span class="timer-pill" id="scenarioTimer">00:00:00</span></div>
+            <div class="meta-line">الخطوات المكتملة: <span id="stepsDone">0</span></div>
+            <div class="meta-line">النقاط المحصلة: <span id="scoreDone">0</span></div>
+        </div>
+    </div>
+
+    <div class="waiting-box" id="waitingBox">
+        <div class="waiting-title"> جاري تجهيز الآلة</div>
+        <div class="waiting-text" id="waitingText">
+            يتم الآن تجهيز بيئة الـ VM الخاصة بك. سيتم تحميل ملف RDP تلقائيًا فور جاهزية الآلة.
+        </div>
+
+        <div class="progress-outer">
+            <div class="progress-inner" id="progressInner"></div>
+        </div>
+
+        <div class="progress-meta">
+            <span id="progressPercent">0%</span>
+            <span id="progressTimerText">الوقت المنقضي: 0 ثانية</span>
+            <span id="progressHint">الرجاء عدم إغلاق الصفحة أثناء التجهيز</span>
+        </div>
+    </div>
+
+    <div class="runtime-box" id="runtimeBox" style="display:none;">
+        <div class="runtime-title">بيئة التنفيذ</div>
+
+        <iframe id="runtimeFrame" class="runtime-frame" src="" style="display:none;"></iframe>
+
+        <div class="rdp-panel" id="rdpPanel" style="display:none;">
+            هذا السيناريو من نوع VM.
+            للوصول إلى البيئة اضغط على زر <strong>تحميل RDP</strong> بالأعلى، أو انتظر وسيتم تحميل الملف تلقائيًا عند جاهزية الآلة.
+        </div>
+
+        <div class="ssh-panel" id="sshPanel" style="display:none;">
+            هذا السيناريو يعمل عبر SSH. استخدم الأمر التالي:
+            <div class="mono-box" id="sshCommand"></div>
+        </div>
+
+        <div class="note-panel" id="dockerNote" style="display:none;">
+            تم تضمين الطرفية داخل الصفحة لتبقى الخطوات والوصف أمام الطالب أثناء التنفيذ.
+        </div>
+    </div>
+
+    <div class="steps-box">
+        <div class="steps-title"> الخطوات</div>
+        <div class="steps-list" id="stepsContainer"></div>
+    </div>
+</div>
+
+<script>
+const API_BASE = "";
+
+const API_ENDPOINTS = {
+    dashboard: () => "/api/student/dashboard",
+    scenarioDetails: (scenarioId) => `/api/student/scenario-details/${scenarioId}`,
+    scenarioSteps: (scenarioId) => `/api/student/scenario-steps/${scenarioId}`,
+    startScenario: (scenarioId) => `/api/student/start/${scenarioId}`,
+    endScenario: (sessionId) => `/api/student/end/${sessionId}`,
+    submitStep: () => "/api/student/submit-step",
+    sessionProgress: (sessionId) => `/api/student/session-progress/${sessionId}`,
+    rdpDownload: (sessionId) => `/api/student/rdp/${sessionId}`,
+};
+
+function qs(name) {
+    return new URLSearchParams(window.location.search).get(name);
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function formatDuration(totalSeconds) {
+    const s = Math.max(0, Math.floor(totalSeconds || 0));
+    const hours = String(Math.floor(s / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
+    const seconds = String(s % 60).padStart(2, "0");
+    return `${hours}:${minutes}:${seconds}`;
+}
+
+async function apiFetch(path, options = {}) {
+    const res = await fetch(API_BASE + path, {
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json",
+            ...(options.headers || {})
+        },
+        ...options
+    });
+
+    let data = null;
+    try { data = await res.json(); } catch (e) {}
+
+    if (!res.ok) {
+        const msg = (data && data.detail) ? data.detail : `HTTP ${res.status}`;
+        throw new Error(msg);
+    }
+
+    return data;
+}
+
+async function logout() {
+    if (!confirm("هل تريد تسجيل الخروج؟")) return;
+
+    try {
+        await apiFetch("/api/auth/logout", { method: "POST" });
+    } catch (e) {}
+
+    window.location.href = "/static/login.html";
+}
+
+const scenarioId = qs("scenario_id");
+
+const userName = document.getElementById("userName");
+const userAvatar = document.getElementById("userAvatar");
+const backLink = document.getElementById("backLink");
+
+const scenarioTitle = document.getElementById("scenarioTitle");
+const scenarioMeta = document.getElementById("scenarioMeta");
+const scenarioDescription = document.getElementById("scenarioDescription");
+const scenarioStatus = document.getElementById("scenarioStatus");
+const scenarioType = document.getElementById("scenarioType");
+const scenarioCourse = document.getElementById("scenarioCourse");
+const stepsCount = document.getElementById("stepsCount");
+const totalPoints = document.getElementById("totalPoints");
+const sessionIdText = document.getElementById("sessionIdText");
+const scenarioTimer = document.getElementById("scenarioTimer");
+const stepsDone = document.getElementById("stepsDone");
+const scoreDone = document.getElementById("scoreDone");
+
+const startBtn = document.getElementById("startBtn");
+const endBtn = document.getElementById("endBtn");
+const rdpBtn = document.getElementById("rdpBtn");
+const copySshBtn = document.getElementById("copySshBtn");
+
+const waitingBox = document.getElementById("waitingBox");
+const waitingText = document.getElementById("waitingText");
+const progressInner = document.getElementById("progressInner");
+const progressPercent = document.getElementById("progressPercent");
+const progressTimerText = document.getElementById("progressTimerText");
+
+const runtimeBox = document.getElementById("runtimeBox");
+const runtimeFrame = document.getElementById("runtimeFrame");
+const rdpPanel = document.getElementById("rdpPanel");
+const sshPanel = document.getElementById("sshPanel");
+const dockerNote = document.getElementById("dockerNote");
+const sshCommand = document.getElementById("sshCommand");
+
+const stepsContainer = document.getElementById("stepsContainer");
+
+let timerInterval = null;
+let waitInterval = null;
+let currentDetails = null;
+let currentRunningSession = null;
+
+function stopTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = null;
+    scenarioTimer.textContent = "00:00:00";
+}
+
+function startTimer(startedAt) {
+    stopTimer();
+    if (!startedAt) return;
+
+    const startMs = new Date(startedAt).getTime();
+
+    const update = () => {
+        const now = Date.now();
+        const diffSeconds = (now - startMs) / 1000;
+        scenarioTimer.textContent = formatDuration(diffSeconds);
+    };
+
+    update();
+    timerInterval = setInterval(update, 1000);
+}
+
+function resetRuntimeUi() {
+    runtimeBox.style.display = "none";
+    runtimeFrame.style.display = "none";
+    runtimeFrame.src = "";
+    rdpPanel.style.display = "none";
+    sshPanel.style.display = "none";
+    dockerNote.style.display = "none";
+    rdpBtn.style.display = "none";
+    copySshBtn.style.display = "none";
+    copySshBtn.onclick = null;
+}
+
+function showWaitingBox() {
+    waitingBox.style.display = "block";
+    progressInner.style.width = "0%";
+    progressPercent.textContent = "0%";
+    progressTimerText.textContent = "الوقت المنقضي: 0 ثانية";
+    waitingText.textContent = "يتم الآن تجهيز بيئة الـ VM الخاصة بك. سيتم تحميل ملف RDP تلقائيًا فور جاهزية الآلة.";
+}
+
+function hideWaitingBox() {
+    waitingBox.style.display = "none";
+    if (waitInterval) clearInterval(waitInterval);
+    waitInterval = null;
+}
+
+function startFakeProgress(maxSeconds = 180) {
+    if (waitInterval) clearInterval(waitInterval);
+
+    const start = Date.now();
+    waitInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - start) / 1000);
+        const ratio = Math.min(elapsed / maxSeconds, 0.95);
+        const percent = Math.floor(ratio * 100);
+
+        progressInner.style.width = `${percent}%`;
+        progressPercent.textContent = `${percent}%`;
+        progressTimerText.textContent = `الوقت المنقضي: ${elapsed} ثانية`;
+    }, 500);
+}
+
+function completeProgressBar() {
+    progressInner.style.width = "100%";
+    progressPercent.textContent = "100%";
+}
+
+function triggerDownload(url) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+}
+
+function renderRuntime(runningSession) {
+    resetRuntimeUi();
+
+    if (!runningSession || !runningSession.runtime_data) return;
+
+    const rd = runningSession.runtime_data || {};
+    runtimeBox.style.display = "block";
+
+    if (rd.type === "vm_rdp") {
+        rdpPanel.style.display = "block";
+        rdpBtn.style.display = "inline-block";
+        rdpBtn.href = rd.rdp_download_url || API_ENDPOINTS.rdpDownload(runningSession.id);
+        return;
+    }
+
+    if (rd.type === "vm_ssh") {
+        sshPanel.style.display = "block";
+
+        const entry = rd.entry_machine || {};
+        const cmd = `ssh ${entry.username || "student"}@${entry.guest_ip || ""}`;
+        sshCommand.textContent = cmd;
+
+        copySshBtn.style.display = "inline-block";
+        copySshBtn.onclick = async () => {
+            try {
+                await navigator.clipboard.writeText(cmd);
+                alert("تم نسخ أمر SSH");
+            } catch {
+                alert("تعذر نسخ أمر SSH");
+            }
+        };
+        return;
+    }
+
+    if (rd.access_url) {
+        runtimeFrame.style.display = "block";
+        dockerNote.style.display = "block";
+        runtimeFrame.src = rd.access_url;
+        return;
+    }
+}
+
+function renderHeader(details, progress) {
+    currentDetails = details;
+    const course = details.course;
+
+    scenarioTitle.textContent = details.name;
+    scenarioMeta.innerHTML = `
+        المفتاح: ${escapeHtml(details.scenario_key)}<br>
+        ID: ${details.id}
+    `;
+    scenarioDescription.textContent = details.description || "لا يوجد وصف لهذا السيناريو.";
+    scenarioType.textContent = details.type === "docker" ? "Docker" : "VM";
+    scenarioCourse.textContent = course ? course.name : "بدون مادة";
+    stepsCount.textContent = details.steps_count || 0;
+    totalPoints.textContent = details.total_possible_score || 0;
+
+    if (course) {
+        backLink.href = `/static/student/course.html?course_id=${course.id}`;
+    } else {
+        backLink.href = "/static/student/dashboard.html";
+    }
+
+    const running = details.running_session;
+    currentRunningSession = running || null;
+
+    if (running) {
+        const phase = running.runtime_data?.phase;
+        if (phase === "starting") {
+            scenarioStatus.textContent = "جاري التجهيز";
+            scenarioStatus.className = "status-starting";
+        } else {
+            scenarioStatus.textContent = running.status === "running" ? "قيد التشغيل" : running.status;
+            scenarioStatus.className = "status-running";
+        }
+
+        sessionIdText.textContent = running.id;
+        startBtn.style.display = "none";
+        endBtn.style.display = "inline-block";
+        startTimer(running.started_at);
+    } else {
+        scenarioStatus.textContent = "غير مشغل";
+        scenarioStatus.className = "status-stopped";
+        sessionIdText.textContent = "-";
+        startBtn.style.display = "inline-block";
+        endBtn.style.display = "none";
+        stopTimer();
+    }
+
+    if (progress) {
+        stepsDone.textContent = progress.completed_steps || 0;
+        scoreDone.textContent = progress.total_score || 0;
+    } else {
+        stepsDone.textContent = "0";
+        scoreDone.textContent = "0";
+    }
+
+    renderRuntime(running);
+}
+
+function renderSteps(steps, progress) {
+    stepsContainer.innerHTML = "";
+
+    if (!steps || !steps.length) {
+        stepsContainer.innerHTML = `<div class="empty-message">لا توجد خطوات لهذا السيناريو بعد</div>`;
+        return;
+    }
+
+    const progressMap = {};
+    if (progress && Array.isArray(progress.steps)) {
+        progress.steps.forEach(p => {
+            progressMap[p.step_id] = p;
+        });
+    }
+
+    steps.forEach(step => {
+        const state = progressMap[step.id];
+        const hasAnswered = state !== undefined;
+        const isCorrect = !!state?.is_correct;
+
+        let answerBox = "";
+        if (step.answer_type === "info") {
+            answerBox = `
+                <div class="step-actions">
+                    <button class="btn" data-submit-info="${step.id}">
+                        تم الاطلاع على الخطوة
+                    </button>
+                </div>
+            `;
+        } else {
+            answerBox = `
+                <div class="step-answer-box">
+                    <input
+                        id="answer-${step.id}"
+                        placeholder="${escapeHtml(step.placeholder || "اكتب إجابتك هنا")}"
+                        value="${escapeHtml(state?.submitted_answer || "")}"
+                    />
+                    <div class="step-actions">
+                        <button class="btn" data-submit-step="${step.id}">
+                            تحقق من الإجابة
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        let statusHtml = `<div class="step-status pending">لم يتم الحل بعد</div>`;
+        if (hasAnswered && isCorrect) {
+            statusHtml = `<div class="step-status correct">تم الحل بنجاح +${state.awarded_points ?? step.points ?? 0} نقطة</div>`;
+        } else if (hasAnswered && !isCorrect) {
+            statusHtml = `<div class="step-status wrong">إجابة غير صحيحة</div>`;
+        }
+
+        stepsContainer.innerHTML += `
+            <div class="step-card">
+                <div class="step-header">
+                    <div>
+                        <div class="step-order">الخطوة ${step.step_order ?? "-"}</div>
+                        <div class="step-title">${escapeHtml(step.title || "خطوة")}</div>
+                    </div>
+                    <div class="step-score">${step.points || 0} نقطة</div>
+                </div>
+
+                <div class="step-desc">${escapeHtml(step.description || "")}</div>
+                ${step.hint ? `<div class="step-hint">تلميح: ${escapeHtml(step.hint)}</div>` : ""}
+                ${answerBox}
+                ${statusHtml}
+            </div>
+        `;
+    });
+
+    stepsContainer.querySelectorAll("[data-submit-step]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const stepId = parseInt(btn.getAttribute("data-submit-step"));
+            const input = document.getElementById(`answer-${stepId}`);
+            const answer = input ? input.value.trim() : "";
+            await submitStep(stepId, answer);
+        });
+    });
+
+    stepsContainer.querySelectorAll("[data-submit-info]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const stepId = parseInt(btn.getAttribute("data-submit-info"));
+            await submitStep(stepId, "__info_completed__");
+        });
+    });
+}
+
+async function submitStep(stepId, answer) {
+    if (!currentRunningSession) {
+        alert("يجب تشغيل السيناريو أولًا قبل حل الخطوات.");
+        return;
+    }
+
+    try {
+        await apiFetch(API_ENDPOINTS.submitStep(), {
+            method: "POST",
+            body: JSON.stringify({
+                session_id: currentRunningSession.id,
+                scenario_id: currentRunningSession.scenario_id,
+                step_id: stepId,
+                answer: answer
+            })
+        });
+
+        await loadScenarioPage();
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
+async function waitForVmReadyAndDownload(maxSeconds = 180) {
+    showWaitingBox();
+    startFakeProgress(maxSeconds);
+
+    const tries = Math.floor(maxSeconds / 2);
+
+    for (let i = 0; i < tries; i++) {
+        const details = await apiFetch(API_ENDPOINTS.scenarioDetails(scenarioId));
+        const running = details.running_session;
+        const rd = running?.runtime_data || {};
+
+        renderHeader(details, null);
+
+        if (running && rd.type === "vm_rdp") {
+            completeProgressBar();
+            hideWaitingBox();
+            await loadScenarioPage();
+
+            const downloadUrl = rd.rdp_download_url || API_ENDPOINTS.rdpDownload(running.id);
+            triggerDownload(downloadUrl);
+            return;
+        }
+
+        if (running && rd.type === "vm_ssh") {
+            completeProgressBar();
+            hideWaitingBox();
+            await loadScenarioPage();
+            return;
+        }
+
+        await new Promise(r => setTimeout(r, 2000));
+    }
+
+    hideWaitingBox();
+    throw new Error("أخذ تشغيل الـ VM وقتًا طويلًا. تأكد من جاهزية البيئة.");
+}
+
+async function startScenario() {
+    try {
+        startBtn.disabled = true;
+        startBtn.textContent = "جاري التشغيل...";
+
+        await apiFetch(API_ENDPOINTS.startScenario(scenarioId), { method: "POST" });
+
+        if (currentDetails.type === "vm") {
+            await waitForVmReadyAndDownload(180);
+            return;
+        }
+
+        await loadScenarioPage();
+    } catch (err) {
+        hideWaitingBox();
+        alert(err.message);
+    } finally {
+        startBtn.disabled = false;
+        startBtn.textContent = "تشغيل السيناريو";
+    }
+}
+
+async function endScenario() {
+    if (!currentRunningSession) return;
+    if (!confirm("هل تريد إنهاء السيناريو؟")) return;
+
+    try {
+        endBtn.disabled = true;
+        endBtn.textContent = "جاري الإنهاء...";
+        await apiFetch(API_ENDPOINTS.endScenario(currentRunningSession.id), { method: "POST" });
+        hideWaitingBox();
+        await loadScenarioPage();
+    } catch (err) {
+        alert(err.message);
+    } finally {
+        endBtn.disabled = false;
+        endBtn.textContent = "إنهاء السيناريو";
+    }
+}
+
+async function loadHeaderUser() {
+    try {
+        const dash = await apiFetch(API_ENDPOINTS.dashboard());
+        userName.textContent = `الطالب: ${dash.user.username}`;
+        userAvatar.textContent = dash.user.username?.trim()?.[0] || "ط";
+    } catch (err) {
+        window.location.href = "/static/login.html";
+    }
+}
+
+async function loadScenarioPage() {
+    if (!scenarioId) {
+        stepsContainer.innerHTML = `<div class="empty-message">السيناريو غير محدد</div>`;
+        return;
+    }
+
+    try {
+        const details = await apiFetch(API_ENDPOINTS.scenarioDetails(scenarioId));
+        let progress = null;
+
+        if (details.running_session && details.running_session.runtime_data?.phase !== "starting") {
+            progress = await apiFetch(API_ENDPOINTS.sessionProgress(details.running_session.id));
+        }
+
+        const steps = await apiFetch(API_ENDPOINTS.scenarioSteps(scenarioId));
+
+        renderHeader(details, progress);
+        renderSteps(steps, progress);
+    } catch (err) {
+        stepsContainer.innerHTML = `<div class="empty-message">${escapeHtml(err.message)}</div>`;
+    }
+}
+
+startBtn.addEventListener("click", startScenario);
+endBtn.addEventListener("click", endScenario);
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadHeaderUser();
+    await loadScenarioPage();
+});
+</script>
+</body>
+</html>

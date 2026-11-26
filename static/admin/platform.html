@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>إدارة المنصة - Cyber Range</title>
+    <link rel="stylesheet" href="/static/admin/admin.css" />
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <div class="logo">
+            <div class="logo-icon">CR</div>
+            <span>Cyber Range</span>
+        </div>
+        <div class="nav-links">
+            <a class="nav-link" href="/static/admin/dashboard.html">لوحة التحكم</a>
+            <a class="nav-link" href="/static/admin/users.html">إدارة المستخدمين</a>
+            <a class="nav-link" href="/static/admin/scenarios.html">إدارة السيناريوهات</a>
+            <a class="nav-link active" href="/static/admin/platform.html">إدارة المنصة</a>
+            <a class="nav-link" href="/static/admin/overview.html">لوحة العرض</a>
+        </div>
+    </div>
+
+    <div class="nav-right">
+        <div class="user-chip">الأدمن</div>
+        <button class="btn btn-danger" onclick="logout()">تسجيل الخروج</button>
+    </div>
+</nav>
+
+<div class="main-content">
+    <h1 class="page-title">إدارة المنصة</h1>
+    <p class="page-subtitle">متابعة موارد السيرفر والـ VMs وruntime clones</p>
+
+    <div class="top-actions">
+        <button class="btn btn-secondary" onclick="loadAll()">تحديث الكل</button>
+    </div>
+
+    <div class="section-block">
+        <h2 class="section-title">موارد السيرفر</h2>
+        <div class="resource-grid" id="resourcesContainer"></div>
+    </div>
+
+    <div class="section-block">
+        <h2 class="section-title">الـ VMs الشغالة</h2>
+        <div class="cards-grid" id="vmsContainer"></div>
+    </div>
+
+    <div class="section-block">
+        <h2 class="section-title">Runtime Clones</h2>
+        <div class="cards-grid" id="runtimeClonesContainer"></div>
+    </div>
+</div>
+
+<script src="/static/admin/admin.js"></script>
+<script>
+async function loadAll() {
+    await Promise.all([
+        loadResources(),
+        loadVms(),
+        loadRuntimeClones()
+    ]);
+}
+
+async function loadResources() {
+    try {
+        const r = await apiFetch("/api/admin/server-resources");
+        document.getElementById("resourcesContainer").innerHTML = `
+            <div class="stat-card"><h3>CPU</h3><div class="stat-value">${r.cpu_percent}%</div></div>
+            <div class="stat-card"><h3>RAM Used</h3><div class="stat-value">${r.ram_used_gb} / ${r.ram_total_gb} GB</div></div>
+            <div class="stat-card"><h3>RAM %</h3><div class="stat-value">${r.ram_percent}%</div></div>
+            <div class="stat-card"><h3>Disk Used</h3><div class="stat-value">${r.disk_used_gb} / ${r.disk_total_gb} GB</div></div>
+            <div class="stat-card"><h3>Disk %</h3><div class="stat-value">${r.disk_percent}%</div></div>
+            <div class="stat-card"><h3>Running VMs</h3><div class="stat-value">${r.running_vms}</div></div>
+            <div class="stat-card"><h3>Docker Containers</h3><div class="stat-value">${r.running_docker_containers}</div></div>
+        `;
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function loadVms() {
+    try {
+        const vms = await apiFetch("/api/admin/vms");
+        const container = document.getElementById("vmsContainer");
+        container.innerHTML = "";
+
+        if (!vms.length) {
+            container.innerHTML = `<div class="empty-message">لا توجد VMs شغالة</div>`;
+            return;
+        }
+
+        vms.forEach(v => {
+            const linked = v.linked_session;
+            const linkedHtml = linked
+                ? `مرتبطة بجلسة: ${linked.session_id} | User: ${linked.user_id} | Scenario: ${linked.scenario_id}`
+                : `غير مرتبطة بجلسة داخل النظام`;
+
+            container.innerHTML += `
+                <div class="card">
+                    <div class="card-title">${escapeHtml(v.name)}</div>
+                    <div class="card-meta">
+                        ${linkedHtml}<br>
+                        <div class="mono">${escapeHtml(v.vmx_path)}</div>
+                    </div>
+                    <div class="card-actions" style="margin-top: 12px;">
+                        <button class="btn btn-danger" onclick="stopVm('${escapeHtml(v.vmx_path)}')">إطفاء VM</button>
+                    </div>
+                </div>
+            `;
+        });
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function stopVm(vmxPath) {
+    if (!confirm("هل تريد إطفاء هذه الـ VM؟")) return;
+
+    try {
+        await apiFetch("/api/admin/stop-vm", {
+            method: "POST",
+            body: JSON.stringify({ vmx_path: vmxPath })
+        });
+        await loadVms();
+        await loadRuntimeClones();
+        await loadResources();
+        alert("تم إطفاء الـ VM");
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function deleteVm(vmxPath) {
+    if (!confirm("هل تريد حذف هذه الـ VM بعد التأكد أنها متوقفة؟")) return;
+
+    try {
+        await apiFetch("/api/admin/delete-vm", {
+            method: "DELETE",
+            body: JSON.stringify({ vmx_path: vmxPath })
+        });
+        await loadVms();
+        await loadRuntimeClones();
+        await loadResources();
+        alert("تم حذف مجلد الـ VM");
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function loadRuntimeClones() {
+    try {
+        const clones = await apiFetch("/api/admin/runtime-clones");
+        const container = document.getElementById("runtimeClonesContainer");
+        container.innerHTML = "";
+
+        if (!clones.length) {
+            container.innerHTML = `<div class="empty-message">لا توجد runtime clones</div>`;
+            return;
+        }
+
+        clones.forEach(c => {
+            let stateText = "يتيم";
+            let stateClass = "status-orphan";
+            if (c.state === "linked_running") {
+                stateText = "مرتبط بجلسة شغالة";
+                stateClass = "status-running";
+            } else if (c.state === "linked_ended") {
+                stateText = "مرتبط بجلسة منتهية";
+                stateClass = "status-ended";
+            }
+
+            const statusHtml = c.is_running
+                ? `<span class="status-running">تشغيل</span>`
+                : `<span class="status-ended">مغلق</span>`;
+
+            const linkedHtml = c.linked_info
+                ? `Session: ${c.linked_info.session_id} | User: ${c.linked_info.user_id} | Scenario: ${c.linked_info.scenario_id}`
+                : `غير مرتبط بجلسة داخل النظام`;
+
+            const vmxList = (c.vmx_files || []).length
+                ? c.vmx_files.map(v => `
+                    <div class="mono">${escapeHtml(v)}</div>
+                    ${!c.is_running ? `<div style="margin-top:8px;"><button class="btn btn-secondary" onclick="deleteVm('${escapeHtml(v)}')">حذف VM</button></div>` : ``}
+                `).join("")
+                : `<div class="empty-message">لا يوجد VMX</div>`;
+
+            container.innerHTML += `
+                <div class="card">
+                    <div class="card-title">${escapeHtml(c.name)}</div>
+                    <div class="card-meta">
+                        الحالة: ${statusHtml}<br>
+                        النوع: <span class="${stateClass}">${stateText}</span><br>
+                        الربط: ${linkedHtml}<br>
+                        الحجم: ${c.size_mb} MB<br>
+                        عدد VMX: ${c.vmx_count}<br>
+                        المسار: ${escapeHtml(c.path)}
+                    </div>
+
+                    <div style="margin-top: 12px;">${vmxList}</div>
+
+                    <div class="card-actions" style="margin-top: 12px;">
+                        ${!c.is_running
+                            ? `<button class="btn btn-danger" onclick="deleteRuntimeClone('${escapeHtml(c.path)}')">حذف المجلد</button>`
+                            : ``
+                        }
+                    </div>
+                </div>
+            `;
+        });
+    } catch (err) {
+        showError(err);
+    }
+}
+
+async function deleteRuntimeClone(path) {
+    if (!confirm("هل تريد حذف هذا الـ runtime clone؟")) return;
+
+    try {
+        await apiFetch("/api/admin/runtime-clones", {
+            method: "DELETE",
+            body: JSON.stringify({ path })
+        });
+        await loadRuntimeClones();
+        await loadResources();
+        alert("تم حذف الـ clone");
+    } catch (err) {
+        showError(err);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", loadAll);
+</script>
+</body>
+</html>

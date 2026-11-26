@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>لوحة تحكم الأدمن - Cyber Range</title>
+    <link rel="stylesheet" href="/static/admin/admin.css" />
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <div class="logo">
+            <div class="logo-icon">CR</div>
+            <span>Cyber Range</span>
+        </div>
+        <div class="nav-links">
+            <a class="nav-link active" href="/static/admin/dashboard.html">لوحة التحكم</a>
+            <a class="nav-link" href="/static/admin/users.html">إدارة المستخدمين</a>
+            <a class="nav-link" href="/static/admin/scenarios.html">إدارة السيناريوهات</a>
+            <a class="nav-link" href="/static/admin/platform.html">إدارة المنصة</a>
+            <a class="nav-link" href="/static/admin/overview.html">لوحة العرض</a>
+        </div>
+    </div>
+
+    <div class="nav-right">
+        <div class="user-chip">الأدمن</div>
+        <button class="btn btn-danger" onclick="logout()">تسجيل الخروج</button>
+    </div>
+</nav>
+
+<div class="main-content">
+    <h1 class="page-title">لوحة تحكم الأدمن</h1>
+    <p class="page-subtitle">اختر القسم الذي تريد الدخول إليه</p>
+
+    <div class="dashboard-grid">
+        <a class="dashboard-card" href="/static/admin/users.html">
+            <h3>إدارة المستخدمين</h3>
+            <p>عرض الطلاب، البحث عنهم، تعديلهم، حذفهم، وعرض إحصائيات كل طالب.</p>
+        </a>
+
+        <a class="dashboard-card" href="/static/admin/scenarios.html">
+            <h3>إدارة السيناريوهات</h3>
+            <p>إضافة سيناريوهات، تعديلها، حذفها، ربطها بالمواد، وإدارة خطواتها.</p>
+        </a>
+
+        <a class="dashboard-card" href="/static/admin/platform.html">
+            <h3>إدارة المنصة</h3>
+            <p>متابعة موارد السيرفر، عرض الـ VMs، إيقافها، حذفها، ومراجعة runtime clones.</p>
+        </a>
+
+        <a class="dashboard-card" href="/static/admin/overview.html">
+            <h3>لوحة العرض</h3>
+            <p>عدد المستخدمين النشطين، الجلسات الحالية، والآلات الشغالة على المنصة.</p>
+        </a>
+    </div>
+</div>
+
+<script src="/static/admin/admin.js"></script>
+</body>
+</html>
